@@ -37,7 +37,7 @@ import java.util.Map;
  *
  * @param <T> The type to work with
  */
-public class ObjectMapper<T> {
+public class SimpleObjectMapper<T> {
     private final Class<T> clazz;
     private final Constructor<T> constructor;
     private final Map<String, FieldData> cachedFields = new HashMap<>();
@@ -53,7 +53,7 @@ public class ObjectMapper<T> {
      * @throws ObjectMappingException If invalid annotated fields are presented
      */
     @SuppressWarnings("unchecked")
-    public static <T> ObjectMapper<T> forClass(@NonNull Class<T> clazz) throws ObjectMappingException {
+    public static <T> SimpleObjectMapper<T> forClass(@NonNull Class<T> clazz) throws ObjectMappingException {
         return DefaultObjectMapperFactory.getInstance().getMapper(clazz);
     }
 
@@ -66,7 +66,7 @@ public class ObjectMapper<T> {
      * @throws ObjectMappingException
      */
     @SuppressWarnings("unchecked")
-    public static <T> ObjectMapper<T>.BoundInstance forObject(@NonNull T obj) throws ObjectMappingException {
+    public static <T> SimpleObjectMapper<T>.BoundInstance forObject(@NonNull T obj) throws ObjectMappingException {
         Preconditions.checkNotNull(obj);
         return forClass((Class<T>) obj.getClass()).bind(obj);
     }
@@ -186,7 +186,7 @@ public class ObjectMapper<T> {
      * @param clazz The type this object mapper will work with
      * @throws ObjectMappingException if the provided class is in someway invalid
      */
-    protected ObjectMapper(Class<T> clazz) throws ObjectMappingException {
+    protected SimpleObjectMapper(Class<T> clazz) throws ObjectMappingException {
         this.clazz = clazz;
         Constructor<T> constructor = null;
         try {
