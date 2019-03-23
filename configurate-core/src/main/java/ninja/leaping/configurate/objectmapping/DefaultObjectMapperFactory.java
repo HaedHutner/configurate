@@ -28,10 +28,11 @@ import java.util.concurrent.ExecutionException;
  * Factory for a basic {@link ObjectMapper}.
  */
 public class DefaultObjectMapperFactory implements ObjectMapperFactory {
-    private static final ObjectMapperFactory INSTANCE = new DefaultObjectMapperFactory();
+
+    private static final DefaultObjectMapperFactory INSTANCE = new DefaultObjectMapperFactory();
 
     @NonNull
-    public static ObjectMapperFactory getInstance() {
+    public static DefaultObjectMapperFactory getInstance() {
         return INSTANCE;
     }
 
@@ -41,17 +42,17 @@ public class DefaultObjectMapperFactory implements ObjectMapperFactory {
             .build(new CacheLoader<Class<?>, ObjectMapper<?>>() {
                 @Override
                 public ObjectMapper<?> load(Class<?> key) throws Exception {
-                    return new ObjectMapper<>(key);
+                    return new SimpleObjectMapper<>(key);
                 }
             });
 
     @NonNull
     @Override
     @SuppressWarnings("unchecked")
-    public <T> ObjectMapper<T> getMapper(@NonNull Class<T> type) throws ObjectMappingException {
+    public <T> SimpleObjectMapper<T> getMapper(@NonNull Class<T> type) throws ObjectMappingException {
         Preconditions.checkNotNull(type, "type");
         try {
-            return (ObjectMapper<T>) mapperCache.get(type);
+            return (SimpleObjectMapper<T>) mapperCache.get(type);
         } catch (ExecutionException e) {
             if (e.getCause() instanceof ObjectMappingException) {
                 throw (ObjectMappingException) e.getCause();

@@ -42,6 +42,7 @@ public class ObjectMapperTest {
     @Test
     public void testCreateFromNode() throws ObjectMappingException {
         final ObjectMapper<TestObject> mapper = ObjectMapper.forClass(TestObject.class);
+
         final ConfigurationNode source = SimpleConfigurationNode.root();
         source.getNode("test-key").setValue("some are born great, some achieve greatness, and some have greatness thrust upon them");
 
@@ -88,7 +89,9 @@ public class ObjectMapperTest {
     @Test
     public void testCommentsApplied() throws ObjectMappingException {
         CommentedConfigurationNode node = SimpleCommentedConfigurationNode.root();
-        ObjectMapper<CommentedObject>.BoundInstance mapper = ObjectMapper.forClass(CommentedObject.class).bindToNew();
+
+        ObjectMapper.BoundInstance<CommentedObject> mapper = ObjectMapper.forClass(CommentedObject.class).bindToNew();
+
         CommentedObject obj = mapper.populate(node);
         obj.color = "fuchsia";
         obj.politician = "All of them";
@@ -162,7 +165,7 @@ public class ObjectMapperTest {
     @Test
     public void testNestedObjectWithComments() throws ObjectMappingException {
         CommentedConfigurationNode node = SimpleCommentedConfigurationNode.root();
-        final ObjectMapper<ParentObject>.BoundInstance mapper = ObjectMapper.forObject(new ParentObject());
+        final ObjectMapper.BoundInstance<ParentObject> mapper = ObjectMapper.forObject(new ParentObject());
         mapper.populate(node);
         assertEquals("Comment on parent", node.getNode("inner").getComment().get());
         assertTrue(node.getNode("inner").hasMapChildren());

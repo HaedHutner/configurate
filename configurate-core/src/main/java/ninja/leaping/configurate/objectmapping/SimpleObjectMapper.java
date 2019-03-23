@@ -29,17 +29,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * This is the object mapper. It handles conversion between configuration nodes and
- * fields annotated with {@link Setting} in objects.
- *
- * Values in the node not used by the mapped object will be preserved.
- *
- * @param <T> The type to work with
- */
-public class SimpleObjectMapper<T> {
+public class SimpleObjectMapper<T> implements ObjectMapper<T> {
+
     private final Class<T> clazz;
+
     private final Constructor<T> constructor;
+
     private final Map<String, FieldData> cachedFields = new HashMap<>();
 
 
@@ -132,23 +127,14 @@ public class SimpleObjectMapper<T> {
         }
     }
 
-    /**
-     * Represents an object mapper bound to a certain instance of the object
-     */
-    public class BoundInstance {
+    public class BoundInstance implements ObjectMapper.BoundInstance<T> {
+
         private final T boundInstance;
 
         protected BoundInstance(T boundInstance) {
             this.boundInstance = boundInstance;
         }
 
-        /**
-         * Populate the annotated fields in a pre-created object
-         *
-         * @param source The source to get data from
-         * @return The object provided, for easier chaining
-         * @throws ObjectMappingException If an error occurs while populating data
-         */
         public T populate(ConfigurationNode source) throws ObjectMappingException {
             for (Map.Entry<String, FieldData> ent : cachedFields.entrySet()) {
                 ConfigurationNode node = source.getNode(ent.getKey());
@@ -157,12 +143,6 @@ public class SimpleObjectMapper<T> {
             return boundInstance;
         }
 
-        /**
-         * Serialize the data contained in annotated fields to the configuration node.
-         *
-         * @param target The target node to serialize to
-         * @throws ObjectMappingException if serialization was not possible due to some error.
-         */
         public void serialize(ConfigurationNode target) throws ObjectMappingException {
             for (Map.Entry<String, FieldData> ent : cachedFields.entrySet()) {
                 ConfigurationNode node = target.getNode(ent.getKey());
@@ -170,11 +150,6 @@ public class SimpleObjectMapper<T> {
             }
         }
 
-        /**
-         * Return the instance this mapper is bound to.
-         *
-         * @return The active instance
-         */
         public T getInstance() {
             return boundInstance;
         }
@@ -237,33 +212,14 @@ public class SimpleObjectMapper<T> {
         }
     }
 
-    /**
-     * Returns whether this object mapper can create new object instances. This may be
-     * false if the provided class has no zero-argument constructors.
-     *
-     * @return Whether new object instances can be created
-     */
     public boolean canCreateInstances() {
         return constructor != null;
     }
 
-    /**
-     * Return a view on this mapper that is bound to a single object instance
-     *
-     * @param instance The instance to bind to
-     * @return A view referencing this mapper and the bound instance
-     */
     public BoundInstance bind(T instance) {
         return new BoundInstance(instance);
     }
 
-    /**
-     * Returns a view on this mapper that is bound to a newly created object instance
-     *
-     * @see #bind(Object)
-     * @return Bound mapper attached to a new object instance
-     * @throws ObjectMappingException If the object could not be constructed correctly
-     */
     public BoundInstance bindToNew() throws ObjectMappingException {
         return new BoundInstance(constructObject());
     }
